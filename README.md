@@ -16,7 +16,6 @@ void setup() {
 
   sensorValues.setup(NUM_READINGS);
   //sensorValues.enableDebug(DEBUG_TYPE_PRINT);
-
 }
 
 void loop() {
