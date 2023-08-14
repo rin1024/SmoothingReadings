@@ -36,7 +36,9 @@ class SmoothingReadings {
     ~SmoothingReadings();
 
     void setup(int _numReadings);
-    bool update(long _rawVal);
+    void setup(int _numReadings, int _numOffsetReadings);
+    bool calcOffset(int _rawVal);
+    bool update(int _rawVal);
 
     int getMin();
     int getMax();
@@ -47,11 +49,16 @@ class SmoothingReadings {
 
   private:
     int numReadings;
-    long readings[SIZE_OF_READINGS]; // TODO: fix me
+    int readings[SIZE_OF_READINGS]; // TODO: fix me
     long total;
     int readingIndex;
 
-    int average;
+    int offsetCount;
+    long totalOffsetVal;
+    int numOffsetReadings;
+
+    int offsetVal;
+    int averageVal;
     int minVal;
     int maxVal;
 

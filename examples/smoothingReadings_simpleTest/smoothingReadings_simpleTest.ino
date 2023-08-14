@@ -8,6 +8,7 @@
 
 /////////////// readings
 #define NUM_READINGS 32
+#define NUM_OFFSET_READINGS 10
 
 SmoothingReadings sensorValues;
 
@@ -22,14 +23,16 @@ void setup() {
   Serial.print("]");
   Serial.println(__M_FILENAME__);
 
-  sensorValues.setup(NUM_READINGS);
+  sensorValues.setup(NUM_READINGS, NUM_OFFSET_READINGS);
   //sensorValues.enableDebug(DEBUG_TYPE_PRINT);
-
+  while (sensorValues.calcOffset(analogRead(0))) {
+    ;
+  }
 }
 
 void loop() {
   int sensorVal = analogRead(0);
-  if (sensorValues.update((long)sensorVal)) {
+  if (sensorValues.update(sensorVal)) {
     int average = sensorValues.getAverage();
     Serial.print("average: ");
     Serial.print(average);

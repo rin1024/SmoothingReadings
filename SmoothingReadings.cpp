@@ -11,7 +11,12 @@ SmoothingReadings::SmoothingReadings() {
   total = 0;
   readingIndex = 0;
 
-  average = 0;
+  offsetCount = 0;
+  totalOffsetVal = 0;
+  numOffsetReadings = 0;
+
+  offsetVal = 0;
+  averageVal = 0;
   minVal = 0;
   maxVal = 0;
 
@@ -29,30 +34,63 @@ SmoothingReadings::~SmoothingReadings() {
    初期化
 */
 void SmoothingReadings::setup(int _numReadings) {
+  setup(_numReadings, 0);
+}
+
+/**
+   初期化
+*/
+void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
   // TODO: implement here
   if (_numReadings > SIZE_OF_READINGS) {
     _numReadings = SIZE_OF_READINGS;
   }
   numReadings = _numReadings;
-  //readings = new long[numReadings];
+  //readings = new int[numReadings];
   for (int i=0;i<numReadings;i++) {
     readings[i] = 0;
   }
   total = 0;
   readingIndex = 0;
+
+  numOffsetReadings = _numOffsetReadings;
+}
+
+/**
+ * オフセットキャリブレーション
+ *
+ * @return true if finished
+ */
+bool SmoothingReadings::calcOffset(int _rawVal) {
+  if (numOffsetReadings == 0) {
+    offsetVal = 0;
+
+    return true;
+  }
+  else if (offsetCount < numOffsetReadings) {
+    totalOffsetVal += long(_rawVal);
+
+    return false;
+  }
+
+  offsetVal = int(totalOffsetVal / long(numOffsetReadings));
+
+  return true;
 }
 
 /**
    アップデート関数
 */
-bool SmoothingReadings::update(long _rawVal) {
+bool SmoothingReadings::update(int _rawVal) {
   boolean updated = false;
   
-  total = total - readings[readingIndex];
-  readings[readingIndex] = _rawVal;
-  total = total + readings[readingIndex];
+  total = total - long(readings[readingIndex]);
+  readings[readingIndex] = _rawVal - offsetVal;
+  total = total + long(readings[readingIndex]);
 
-  average = total / numReadings;
+  // TODO: 最大値、最小値の処理を追加する予定
+
+  averageVal = int(total / long(numReadings));
   if (++readingIndex >= numReadings) {
     if (debugType == DEBUG_TYPE_PRINT) {
       debugPrint();
@@ -72,7 +110,7 @@ bool SmoothingReadings::update(long _rawVal) {
    平均値を返す
 */
 int SmoothingReadings::getAverage() {
-  return average;
+  return averageVal;
 }
 
 /**
@@ -108,7 +146,11 @@ void SmoothingReadings::disableDebug() {
 */
 void SmoothingReadings::debugPrint() {
   Serial.print("average: ");
-  Serial.print(average);
+  Serial.print(averageVal);
+  Serial.print("\t");
+
+  Serial.print("offset: ");
+  Serial.print(offsetVal);
   Serial.print("\t");
 
   Serial.print("minVal: ");
@@ -125,7 +167,10 @@ void SmoothingReadings::debugPrint() {
    プロット用のデバッグ表示をする
 */
 void SmoothingReadings::debugPlot() {
-  Serial.print(average);
+  Serial.print(averageVal);
+  Serial.print("\t");
+
+  Serial.print(offsetVal);
   Serial.print("\t");
 
   Serial.print(minVal);
