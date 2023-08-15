@@ -15,6 +15,7 @@ SmoothingReadings::SmoothingReadings(int _numReadings) {
 
   offsetVal = 0;
   averageVal = 0;
+  accelVal = 0;
   minVal = 0;
   maxVal = 0;
 
@@ -67,12 +68,14 @@ bool SmoothingReadings::calcOffset(int _rawVal) {
    アップデート関数
 */
 bool SmoothingReadings::update(int _rawVal) {
-  boolean updated = false;
+  bool updated = false;
 
   int formattedVal = _rawVal - offsetVal;
   
   total = total - long(readings[readingIndex]);
+  
   readings[readingIndex] = formattedVal;
+  
   total = total + long(readings[readingIndex]);
 
   if (minVal > formattedVal) {
@@ -85,6 +88,12 @@ bool SmoothingReadings::update(int _rawVal) {
 
   averageVal = int(total / long(numReadings));
   if (++readingIndex >= numReadings) {
+    // calcAccel
+    accelVal = 0;
+    for (int i=0;i<numReadings - 1;i++) {
+      accelVal += readings[i + 1] - readings[i];
+    }
+
     if (debugType == DEBUG_TYPE_PRINT) {
       debugPrint(_rawVal);
     }
@@ -94,6 +103,7 @@ bool SmoothingReadings::update(int _rawVal) {
     
     readingIndex = 0;
     updated = true;
+    firstLoop = false;
   }
 
   return updated;
@@ -110,14 +120,17 @@ int SmoothingReadings::getNumReadings() {
    再度配列を確保
 */
 void SmoothingReadings::reallocReadings(int _numReadings) {
+  firstLoop = true;
+
   numReadings = _numReadings;
 
   readings = new int[numReadings];
   for (int i=0;i<numReadings;i++) {
     readings[i] = 0;
   }
-  total = 0;
   readingIndex = 0;
+  
+  total = 0;
 }
 
 /**
@@ -146,6 +159,13 @@ int SmoothingReadings::getOffset() {
 */
 int SmoothingReadings::getAverage() {
   return averageVal;
+}
+
+/**
+   加速度を返す
+*/
+int SmoothingReadings::getAccel() {
+  return accelVal;
 }
 
 /**
@@ -195,6 +215,9 @@ void SmoothingReadings::debugPrint(int _rawVal) {
   Serial.print(averageVal);
   Serial.print("\t");
 
+  Serial.print("accelVal: ");
+  Serial.print(accelVal);
+
   Serial.print("offset: ");
   Serial.print(offsetVal);
   Serial.print("\t");
@@ -224,6 +247,9 @@ void SmoothingReadings::debugPlot(int _rawVal) {
   Serial.print("\t");
 
   Serial.print(averageVal);
+  Serial.print("\t");
+
+  Serial.print(accelVal);
   Serial.print("\t");
 
   Serial.print(offsetVal);

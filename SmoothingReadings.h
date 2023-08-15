@@ -45,6 +45,7 @@ class SmoothingReadings {
     
     int getOffset();
     int getAverage();
+    int getAccel();
     int getMin();
     int getMax();
 
@@ -59,10 +60,12 @@ class SmoothingReadings {
     void dumpReadings();
 
   private:
+    bool firstLoop;
+
     int numReadings;
     int *readings;
-    long total;
     int readingIndex;
+    long total;
 
     int offsetCount;
     long totalOffsetVal;
@@ -70,6 +73,7 @@ class SmoothingReadings {
 
     int offsetVal;
     int averageVal;
+    int accelVal;
     int minVal;
     int maxVal;
 
