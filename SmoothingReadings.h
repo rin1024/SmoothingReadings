@@ -43,9 +43,10 @@ class SmoothingReadings {
     int getReading(int _index);
     int getReadingIndex();
     
+    int getOffset();
+    int getAverage();
     int getMin();
     int getMax();
-    int getAverage();
 
     void enableDebug(int _debugType);
     void disableDebug();

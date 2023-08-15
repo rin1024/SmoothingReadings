@@ -135,6 +135,13 @@ int SmoothingReadings::getReadingIndex() {
 }
 
 /**
+   オフセット値を返す
+*/
+int SmoothingReadings::getOffset() {
+  return offsetVal;
+}
+
+/**
    平均値を返す
 */
 int SmoothingReadings::getAverage() {
