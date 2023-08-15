@@ -62,18 +62,15 @@ void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
  * @return true if finished
  */
 bool SmoothingReadings::calcOffset(int _rawVal) {
-  if (numOffsetReadings == 0) {
-    offsetVal = 0;
-
-    return true;
-  }
-  else if (offsetCount < numOffsetReadings) {
+  if (offsetCount++ < numOffsetReadings) {
     totalOffsetVal += long(_rawVal);
 
     return false;
   }
 
-  offsetVal = int(totalOffsetVal / long(numOffsetReadings));
+  offsetVal = numOffsetReadings == 0 ? 
+    0 : 
+    int(totalOffsetVal / long(numOffsetReadings));
 
   return true;
 }
