@@ -7,7 +7,7 @@
 #define BAUD_RATE 115200
 
 /////////////// readings
-#define NUM_READINGS 32
+#define NUM_READINGS 64
 #define NUM_OFFSET_READINGS 10
 
 SmoothingReadings sensorValues;
@@ -24,18 +24,31 @@ void setup() {
   Serial.println(__M_FILENAME__);
 
   sensorValues.setup(NUM_READINGS, NUM_OFFSET_READINGS);
-  //sensorValues.enableDebug(DEBUG_TYPE_PRINT);
+  //sensorValues.enableDebug(DEBUG_TYPE_PLOT);
   while (sensorValues.calcOffset(analogRead(0))) {
     ;
   }
 }
 
 void loop() {
-  int sensorVal = analogRead(0);
+  //int sensorVal = analogRead(0);
+  //int sensorVal = cnt++ % 75;
+  //int sensorVal = random(0, 1024);
+  int sensorVal = int(sin(millis()) * 1000.0);
   if (sensorValues.update(sensorVal)) {
+    // readings一覧を表示
+    //sensorValues.dumpReadings();
+
+    // 平均値と加速度を表示
     int average = sensorValues.getAverage();
-    Serial.print("average: ");
+    int accel = sensorValues.getAccel();
+    //Serial.print("average: ");
     Serial.print(average);
+    Serial.print("\t");
+    //Serial.print("accel: ");
+    Serial.print(accel);
     Serial.println();
   }
+
+  //delay(25);
 }
