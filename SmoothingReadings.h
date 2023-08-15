@@ -65,7 +65,9 @@ class SmoothingReadings {
     int debugType;
 
     void debugPrint();
+    void debugPrint(int _rawVal);
     void debugPlot();
+    void debugPlot(int _rawVal);
 };
 
 #endif

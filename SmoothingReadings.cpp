@@ -83,20 +83,28 @@ bool SmoothingReadings::calcOffset(int _rawVal) {
 */
 bool SmoothingReadings::update(int _rawVal) {
   boolean updated = false;
+
+  int formattedVal = _rawVal - offsetVal;
   
   total = total - long(readings[readingIndex]);
-  readings[readingIndex] = _rawVal - offsetVal;
+  readings[readingIndex] = formattedVal;
   total = total + long(readings[readingIndex]);
 
-  // TODO: 最大値、最小値の処理を追加する予定
+  if (minVal > formattedVal) {
+    minVal = formattedVal;
+  }
+
+  if (maxVal < formattedVal) {
+    maxVal = formattedVal;
+  }
 
   averageVal = int(total / long(numReadings));
   if (++readingIndex >= numReadings) {
     if (debugType == DEBUG_TYPE_PRINT) {
-      debugPrint();
+      debugPrint(_rawVal);
     }
     else if (debugType == DEBUG_TYPE_PLOT) {
-      debugPlot();
+      debugPlot(_rawVal);
     }
     
     readingIndex = 0;
@@ -145,6 +153,17 @@ void SmoothingReadings::disableDebug() {
    デバッグ表示をする
 */
 void SmoothingReadings::debugPrint() {
+  debugPrint(0);
+}
+
+/**
+   デバッグ表示をする
+*/
+void SmoothingReadings::debugPrint(int _rawVal) {
+  Serial.print("rawVal: ");
+  Serial.print(_rawVal);
+  Serial.print("\t");
+
   Serial.print("average: ");
   Serial.print(averageVal);
   Serial.print("\t");
@@ -167,6 +186,16 @@ void SmoothingReadings::debugPrint() {
    プロット用のデバッグ表示をする
 */
 void SmoothingReadings::debugPlot() {
+  debugPlot(0);
+}
+
+/**
+   プロット用のデバッグ表示をする
+*/
+void SmoothingReadings::debugPlot(int _rawVal) {
+  Serial.print(_rawVal);
+  Serial.print("\t");
+
   Serial.print(averageVal);
   Serial.print("\t");
 
