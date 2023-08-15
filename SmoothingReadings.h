@@ -12,6 +12,7 @@
 #include <inttypes.h>
 #include <math.h>
 #include <avr/pgmspace.h>
+#include <QuickStats.h>
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
 #else
@@ -21,7 +22,11 @@
 /*******************************************
    const
  *******************************************/
-#define SIZE_OF_READINGS 32 // TODO: fix me
+#define SIZE_OF_READINGS 32   // TODO: fix me
+#define READINGS_SCALE 10000.0 // float型に適応するためにスケールを変換している、floatは6から7桁の精度なので100000.0くらいがいいところ？
+
+#define MIN_VAL 0
+#define MAX_VAL 32767
 
 #define DEBUG_TYPE_NONE  0
 #define DEBUG_TYPE_PRINT 1
@@ -40,27 +45,31 @@ class SmoothingReadings {
     bool calcOffset(int _rawVal);
     bool update(int _rawVal);
 
+    int getOffset();
+    int getAverage();
     int getMin();
     int getMax();
-    int getAverage();
+    int getMedi();
 
     void enableDebug(int _debugType);
     void disableDebug();
 
   private:
+    QuickStats stats;
+
     int numReadings;
-    int readings[SIZE_OF_READINGS]; // TODO: fix me
-    long total;
+    float readings[SIZE_OF_READINGS]; // TODO: fix me
     int readingIndex;
 
-    int offsetCount;
-    long totalOffsetVal;
     int numOffsetReadings;
+    float offsetReadings[SIZE_OF_READINGS];
+    int offsetIndex;
 
     int offsetVal;
     int averageVal;
     int minVal;
     int maxVal;
+    int mediVal; // 中央値
 
     int debugType;
 

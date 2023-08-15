@@ -8,17 +8,16 @@
 */
 SmoothingReadings::SmoothingReadings() {
   numReadings = 0;
-  total = 0;
   readingIndex = 0;
 
-  offsetCount = 0;
-  totalOffsetVal = 0;
+  offsetIndex = 0;
   numOffsetReadings = 0;
 
   offsetVal = 0;
   averageVal = 0;
   minVal = 0;
   maxVal = 0;
+  mediVal = 0;
 
   debugType = DEBUG_TYPE_NONE;
 }
@@ -48,12 +47,18 @@ void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
   numReadings = _numReadings;
   //readings = new int[numReadings];
   for (int i=0;i<numReadings;i++) {
-    readings[i] = 0;
+    readings[i] = 0.0;
   }
-  total = 0;
   readingIndex = 0;
 
+  if (_numOffsetReadings > SIZE_OF_READINGS) {
+    _numOffsetReadings = SIZE_OF_READINGS;
+  }
   numOffsetReadings = _numOffsetReadings;
+  for (int i=0;i<numOffsetReadings;i++) {
+    offsetReadings[i] = 0.0;
+  }
+  offsetIndex = 0;
 }
 
 /**
@@ -62,18 +67,24 @@ void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
  * @return true if finished
  */
 bool SmoothingReadings::calcOffset(int _rawVal) {
-  if (numOffsetReadings == 0) {
-    offsetVal = 0;
+  if (offsetIndex < numOffsetReadings) {
+    //if (_rawVal < MIN_VAL || _rawVal > MAX_VAL) {
+    //  Serial.print("rawVal seems overflow? ");
+    //  Serial.println(_rawVal);
+    //}
 
-    return true;
-  }
-  else if (offsetCount < numOffsetReadings) {
-    totalOffsetVal += long(_rawVal);
+    offsetReadings[offsetIndex] = float(_rawVal) / READINGS_SCALE;
+    //Serial.println(offsetReadings[offsetIndex]);
+
+    offsetIndex++;
 
     return false;
   }
 
-  offsetVal = int(totalOffsetVal / long(numOffsetReadings));
+  Serial.print("stats: ");
+  Serial.println(stats.average(offsetReadings, numOffsetReadings));
+  offsetVal = numOffsetReadings == 0 ? 0 : 
+    int(stats.average(offsetReadings, numOffsetReadings) * READINGS_SCALE);
 
   return true;
 }
@@ -84,14 +95,20 @@ bool SmoothingReadings::calcOffset(int _rawVal) {
 bool SmoothingReadings::update(int _rawVal) {
   boolean updated = false;
   
-  total = total - long(readings[readingIndex]);
-  readings[readingIndex] = _rawVal - offsetVal;
-  total = total + long(readings[readingIndex]);
+  //if (_rawVal < MIN_VAL || _rawVal > MAX_VAL) {
+  //  Serial.print("rawVal seems overflow? ");
+  //  Serial.println(_rawVal);
+  //}
+  
+  // TODO: 3回サンプリングして良い値を選ぶなどするか？
+  readings[readingIndex] = float(_rawVal - offsetVal) / READINGS_SCALE;
 
-  // TODO: 最大値、最小値の処理を追加する予定
-
-  averageVal = int(total / long(numReadings));
   if (++readingIndex >= numReadings) {
+    averageVal = int(stats.average(readings, numReadings) * READINGS_SCALE);
+    minVal = int(stats.minimum(readings, numReadings) * READINGS_SCALE);
+    maxVal = int(stats.maximum(readings, numReadings) * READINGS_SCALE);
+    mediVal = int(stats.median(readings, numReadings) * READINGS_SCALE);
+
     if (debugType == DEBUG_TYPE_PRINT) {
       debugPrint();
     }
@@ -104,6 +121,13 @@ bool SmoothingReadings::update(int _rawVal) {
   }
 
   return updated;
+}
+
+/**
+   オフセット値を返す
+*/
+int SmoothingReadings::getOffset() {
+  return offsetVal;
 }
 
 /**
@@ -125,6 +149,13 @@ int SmoothingReadings::getMin() {
 */
 int SmoothingReadings::getMax() {
   return maxVal;
+}
+
+/**
+   中央値を返す
+*/
+int SmoothingReadings::getMedi() {
+  return mediVal;
 }
 
 /**
@@ -159,6 +190,10 @@ void SmoothingReadings::debugPrint() {
 
   Serial.print("maxVal: ");
   Serial.print(maxVal);
+  Serial.print("\t");
+
+  Serial.print("mediVal: ");
+  Serial.print(mediVal);
 
   Serial.println();
 }
@@ -177,6 +212,9 @@ void SmoothingReadings::debugPlot() {
   Serial.print("\t");
 
   Serial.print(maxVal);
+  Serial.print("\t");
+
+  Serial.print(mediVal);
 
   Serial.println();
 }
