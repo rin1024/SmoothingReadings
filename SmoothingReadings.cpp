@@ -6,10 +6,8 @@
 /**
    コンストラクタ
 */
-SmoothingReadings::SmoothingReadings() {
-  numReadings = 0;
-  total = 0;
-  readingIndex = 0;
+SmoothingReadings::SmoothingReadings(int _numReadings) {  
+  reallocReadings(_numReadings);
 
   offsetCount = 0;
   totalOffsetVal = 0;
@@ -27,7 +25,7 @@ SmoothingReadings::SmoothingReadings() {
    デストラクタ
 */
 SmoothingReadings::~SmoothingReadings() {
-  //delete[] readings;
+  delete[] readings;
 }
 
 /**
@@ -41,17 +39,7 @@ void SmoothingReadings::setup(int _numReadings) {
    初期化
 */
 void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
-  // TODO: implement here
-  if (_numReadings > SIZE_OF_READINGS) {
-    _numReadings = SIZE_OF_READINGS;
-  }
-  numReadings = _numReadings;
-  //readings = new int[numReadings];
-  for (int i=0;i<numReadings;i++) {
-    readings[i] = 0;
-  }
-  total = 0;
-  readingIndex = 0;
+  reallocReadings(_numReadings);
 
   numOffsetReadings = _numOffsetReadings;
 }
@@ -109,6 +97,41 @@ bool SmoothingReadings::update(int _rawVal) {
   }
 
   return updated;
+}
+
+/**
+   総readingsを返す
+*/
+int SmoothingReadings::getNumReadings() {
+  return numReadings;
+}
+
+/**
+   再度配列を確保
+*/
+void SmoothingReadings::reallocReadings(int _numReadings) {
+  numReadings = _numReadings;
+
+  readings = new int[numReadings];
+  for (int i=0;i<numReadings;i++) {
+    readings[i] = 0;
+  }
+  total = 0;
+  readingIndex = 0;
+}
+
+/**
+   任意のindexのreadingsをかえす
+*/
+int SmoothingReadings::getReading(int _index) {
+  return readings[_index];
+}
+
+/**
+   現在位置を返す
+*/
+int SmoothingReadings::getReadingIndex() {
+  return readingIndex;
 }
 
 /**
@@ -204,5 +227,24 @@ void SmoothingReadings::debugPlot(int _rawVal) {
 
   Serial.print(maxVal);
 
+  Serial.println();
+}
+
+/**
+   現在のreadingsをhead(readingIndex)から表示する
+   */
+void SmoothingReadings::dumpReadings() {
+  int headIndex = this->getReadingIndex();
+  int numReadings = this->getNumReadings();
+  Serial.print("[");
+  Serial.print(headIndex);
+  Serial.print(" / ");
+  Serial.print(numReadings);
+  Serial.print("] ");
+  for (int i=0;i<numReadings;i++) {
+    int val = this->getReading((headIndex + i) % numReadings);
+    Serial.print(val);
+    Serial.print(" ");
+  }
   Serial.println();
 }

@@ -21,8 +21,6 @@
 /*******************************************
    const
  *******************************************/
-#define SIZE_OF_READINGS 32 // TODO: fix me
-
 #define DEBUG_TYPE_NONE  0
 #define DEBUG_TYPE_PRINT 1
 #define DEBUG_TYPE_PLOT  2
@@ -32,7 +30,7 @@
  **************************************************************************************/
 class SmoothingReadings {
   public:
-    SmoothingReadings();
+    SmoothingReadings(int _numReadings = 5);
     ~SmoothingReadings();
 
     void setup(int _numReadings);
@@ -40,6 +38,11 @@ class SmoothingReadings {
     bool calcOffset(int _rawVal);
     bool update(int _rawVal);
 
+    int getNumReadings();
+    void reallocReadings(int _numReadings);
+    int getReading(int _index);
+    int getReadingIndex();
+    
     int getMin();
     int getMax();
     int getAverage();
@@ -47,9 +50,16 @@ class SmoothingReadings {
     void enableDebug(int _debugType);
     void disableDebug();
 
+    void debugPrint();
+    void debugPrint(int _rawVal);
+    void debugPlot();
+    void debugPlot(int _rawVal);
+
+    void dumpReadings();
+
   private:
     int numReadings;
-    int readings[SIZE_OF_READINGS]; // TODO: fix me
+    int *readings;
     long total;
     int readingIndex;
 
@@ -63,11 +73,6 @@ class SmoothingReadings {
     int maxVal;
 
     int debugType;
-
-    void debugPrint();
-    void debugPrint(int _rawVal);
-    void debugPlot();
-    void debugPlot(int _rawVal);
 };
 
 #endif
