@@ -45,6 +45,7 @@ class SmoothingReadings {
     
     int getOffset();
     int getAverage();
+    int calcAccel();
     int getAccel();
     int getMin();
     int getMax();

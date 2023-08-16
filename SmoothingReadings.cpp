@@ -88,11 +88,7 @@ bool SmoothingReadings::update(int _rawVal) {
 
   averageVal = int(total / long(numReadings));
   if (++readingIndex >= numReadings) {
-    // calcAccel
-    accelVal = 0;
-    for (int i=0;i<numReadings - 1;i++) {
-      accelVal += readings[i + 1] - readings[i];
-    }
+    calcAccel();
 
     if (debugType == DEBUG_TYPE_PRINT) {
       debugPrint(_rawVal);
@@ -159,6 +155,21 @@ int SmoothingReadings::getOffset() {
 */
 int SmoothingReadings::getAverage() {
   return averageVal;
+}
+
+/**
+   加速度をその場で計算して返す
+*/
+int SmoothingReadings::calcAccel() {
+  accelVal = 0;
+
+  for (int i=1;i<numReadings;i++) {
+    accelVal += readings[i] - readings[i - 1];
+  }
+
+  accelVal += readings[numReadings - 1] - readings[0];
+
+  return accelVal;
 }
 
 /**
