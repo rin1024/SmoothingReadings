@@ -56,6 +56,7 @@ class SmoothingReadings {
     void debugPrint(int _rawVal);
     void debugPlot();
     void debugPlot(int _rawVal);
+    void showPlotLabel();
 
     void dumpReadings();
 

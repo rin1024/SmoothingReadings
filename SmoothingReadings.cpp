@@ -264,6 +264,30 @@ void SmoothingReadings::debugPlot(int _rawVal) {
 }
 
 /**
+   プロット用のラベル表示をする
+*/
+void SmoothingReadings::showPlotLabel() {
+  Serial.print("raw");
+  Serial.print("\t");
+
+  Serial.print("average");
+  Serial.print("\t");
+
+  Serial.print("accel");
+  Serial.print("\t");
+
+  Serial.print("offset");
+  Serial.print("\t");
+
+  Serial.print("min");
+  Serial.print("\t");
+
+  Serial.print("max");
+
+  Serial.println();
+}
+
+/**
    現在のreadingsをhead(readingIndex)から表示する
    */
 void SmoothingReadings::dumpReadings() {
