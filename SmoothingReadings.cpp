@@ -15,7 +15,6 @@ SmoothingReadings::SmoothingReadings(int _numReadings) {
 
   offsetVal = 0;
   averageVal = 0;
-  lastAverageVal = 0;
   accelVal = 0;
   minVal = 0;
   maxVal = 0;
@@ -88,21 +87,20 @@ bool SmoothingReadings::update(long _rawVal) {
   }
 
   averageVal = total / long(numReadings);
-  if (++readingIndex >= numReadings) {
-    calcAccel();
 
-    if (debugType == DEBUG_TYPE_PRINT) {
-      debugPrint(_rawVal);
-    }
-    else if (debugType == DEBUG_TYPE_PLOT) {
-      debugPlot(_rawVal);
-    }
-    
+  calcAccel();
+  
+  if (debugType == DEBUG_TYPE_PRINT) {
+    debugPrint(_rawVal);
+  }
+  else if (debugType == DEBUG_TYPE_PLOT) {
+    debugPlot(_rawVal);
+  }
+
+  if (++readingIndex >= numReadings) {
     readingIndex = 0;
     updated = true;
     firstLoop = false;
-
-    lastAverageVal = averageVal;
   }
 
   return updated;
@@ -161,27 +159,19 @@ long SmoothingReadings::getAverage() {
 }
 
 /**
-   前回の平均値を返す
-*/
-long SmoothingReadings::getLastAverage() {
-  return lastAverageVal;
-}
-
-/**
    加速度をその場で計算して返す
 */
 long SmoothingReadings::calcAccel() {
   // readingsからの差分でちゃんと計算する場合
-  /*accelVal = 0;
+  accelVal = 0;
 
   for (int i=1;i<numReadings;i++) {
     accelVal += readings[i] - readings[i - 1];
   }
 
-  accelVal += readings[numReadings - 1] - readings[0];*/
-
-  // avgの比較のみで加速度を取る場合
-  accelVal = lastAverageVal - averageVal;
+  if (!firstLoop) {
+    accelVal += readings[numReadings - 1] - readings[0];
+  }
 
   return accelVal;
 }
@@ -240,10 +230,6 @@ void SmoothingReadings::debugPrint(long _rawVal) {
   Serial.print(averageVal);
   Serial.print(F("\t"));
 
-  Serial.print(F("lastAverage: "));
-  Serial.print(lastAverageVal);
-  Serial.print(F("\t"));
-
   Serial.print(F("accelVal: "));
   Serial.print(accelVal);
 
@@ -278,9 +264,6 @@ void SmoothingReadings::debugPlot(long _rawVal) {
   Serial.print(averageVal);
   Serial.print(F("\t"));
 
-  Serial.print(lastAverageVal);
-  Serial.print(F("\t"));
-
   Serial.print(accelVal);
   Serial.print(F("\t"));
 
@@ -303,9 +286,6 @@ void SmoothingReadings::showPlotLabel() {
   Serial.print(F("\t"));
 
   Serial.print(F("average"));
-  Serial.print(F("\t"));
-
-  Serial.print(F("lastAverage"));
   Serial.print(F("\t"));
 
   Serial.print(F("accel"));

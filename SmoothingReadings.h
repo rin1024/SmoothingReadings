@@ -45,7 +45,6 @@ class SmoothingReadings {
     
     long getOffset();
     long getAverage();
-    long getLastAverage();
     long calcAccel();
     long getAccel();
     long getMin();
@@ -76,7 +75,6 @@ class SmoothingReadings {
 
     long offsetVal;
     long averageVal;
-    long lastAverageVal;
     long accelVal;
     long minVal;
     long maxVal;
