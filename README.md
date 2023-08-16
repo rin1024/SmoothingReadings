@@ -20,8 +20,8 @@ void setup() {
 
 void loop() {
   int sensorVal = analogRead(0);
-  if (sensorValues.update((long)sensorVal)) {
-    int average = sensorValues.getAverage();
+  if (sensorValues.update(long(sensorVal))) {
+    long average = sensorValues.getAverage();
     Serial.print("average: ");
     Serial.print(average);
     Serial.println();
