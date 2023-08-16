@@ -31,17 +31,17 @@ void setup() {
 }
 
 void loop() {
-  //int sensorVal = analogRead(0);
-  //int sensorVal = cnt++ % 75;
-  //int sensorVal = random(0, 1024);
-  int sensorVal = int(sin(millis()) * 1000.0);
+  //long sensorVal = analogRead(0);
+  //long sensorVal = cnt++ % 75;
+  //long sensorVal = random(0, 1024);
+  long sensorVal = long(sin(millis()) * 1000.0);
   if (sensorValues.update(sensorVal)) {
     // readings一覧を表示
     //sensorValues.dumpReadings();
 
     // 平均値と加速度を表示
-    int average = sensorValues.getAverage();
-    int accel = sensorValues.getAccel();
+    long average = sensorValues.getAverage();
+    long accel = sensorValues.getAccel();
     //Serial.print("average: ");
     Serial.print(average);
     Serial.print("\t");

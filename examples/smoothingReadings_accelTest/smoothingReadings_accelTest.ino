@@ -34,14 +34,14 @@ void loop() {
   int receivedVal = getSerialData();
   
   if (receivedVal > -1) {
-    boolean updated = sensorValues.update(receivedVal);
+    boolean updated = sensorValues.update(long(receivedVal));
 
     // readings一覧を表示
     sensorValues.dumpReadings();
     
     //if (updated) {
-      int average = sensorValues.getAverage();
-      int accel = sensorValues.getAccel();
+      long average = sensorValues.getAverage();
+      long accel = sensorValues.getAccel();
       Serial.print("average: ");
       Serial.print(average);
       Serial.print("\t");

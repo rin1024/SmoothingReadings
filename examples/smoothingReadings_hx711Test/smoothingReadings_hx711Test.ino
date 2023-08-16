@@ -43,7 +43,7 @@ void setup() {
 void loop() {
   if (scale.is_ready()) {
     long reading = scale.read();
-    boolean updated = sensorValues.update(int(reading));
+    boolean updated = sensorValues.update(reading);
 
     // readings一覧を表示
     //sensorValues.dumpReadings();

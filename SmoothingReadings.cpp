@@ -15,6 +15,7 @@ SmoothingReadings::SmoothingReadings(int _numReadings) {
 
   offsetVal = 0;
   averageVal = 0;
+  lastAverageVal = 0;
   accelVal = 0;
   minVal = 0;
   maxVal = 0;
@@ -50,7 +51,7 @@ void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
  *
  * @return true if finished
  */
-bool SmoothingReadings::calcOffset(int _rawVal) {
+bool SmoothingReadings::calcOffset(long _rawVal) {
   if (offsetCount++ < numOffsetReadings) {
     totalOffsetVal += long(_rawVal);
 
@@ -59,7 +60,7 @@ bool SmoothingReadings::calcOffset(int _rawVal) {
 
   offsetVal = numOffsetReadings == 0 ? 
     0 : 
-    int(totalOffsetVal / long(numOffsetReadings));
+    totalOffsetVal / long(numOffsetReadings);
 
   return true;
 }
@@ -67,16 +68,16 @@ bool SmoothingReadings::calcOffset(int _rawVal) {
 /**
    アップデート関数
 */
-bool SmoothingReadings::update(int _rawVal) {
+bool SmoothingReadings::update(long _rawVal) {
   bool updated = false;
 
-  int formattedVal = _rawVal - offsetVal;
+  long formattedVal = _rawVal - offsetVal;
   
-  total = total - long(readings[readingIndex]);
+  total = total - readings[readingIndex];
   
   readings[readingIndex] = formattedVal;
   
-  total = total + long(readings[readingIndex]);
+  total = total + readings[readingIndex];
 
   if (minVal > formattedVal) {
     minVal = formattedVal;
@@ -86,7 +87,7 @@ bool SmoothingReadings::update(int _rawVal) {
     maxVal = formattedVal;
   }
 
-  averageVal = int(total / long(numReadings));
+  averageVal = total / long(numReadings);
   if (++readingIndex >= numReadings) {
     calcAccel();
 
@@ -100,6 +101,8 @@ bool SmoothingReadings::update(int _rawVal) {
     readingIndex = 0;
     updated = true;
     firstLoop = false;
+
+    lastAverageVal = averageVal;
   }
 
   return updated;
@@ -120,7 +123,7 @@ void SmoothingReadings::reallocReadings(int _numReadings) {
 
   numReadings = _numReadings;
 
-  readings = new int[numReadings];
+  readings = new long[numReadings];
   for (int i=0;i<numReadings;i++) {
     readings[i] = 0;
   }
@@ -132,7 +135,7 @@ void SmoothingReadings::reallocReadings(int _numReadings) {
 /**
    任意のindexのreadingsをかえす
 */
-int SmoothingReadings::getReading(int _index) {
+long SmoothingReadings::getReading(int _index) {
   return readings[_index];
 }
 
@@ -146,28 +149,39 @@ int SmoothingReadings::getReadingIndex() {
 /**
    オフセット値を返す
 */
-int SmoothingReadings::getOffset() {
+long SmoothingReadings::getOffset() {
   return offsetVal;
 }
 
 /**
    平均値を返す
 */
-int SmoothingReadings::getAverage() {
+long SmoothingReadings::getAverage() {
   return averageVal;
+}
+
+/**
+   前回の平均値を返す
+*/
+long SmoothingReadings::getLastAverage() {
+  return lastAverageVal;
 }
 
 /**
    加速度をその場で計算して返す
 */
-int SmoothingReadings::calcAccel() {
-  accelVal = 0;
+long SmoothingReadings::calcAccel() {
+  // readingsからの差分でちゃんと計算する場合
+  /*accelVal = 0;
 
   for (int i=1;i<numReadings;i++) {
     accelVal += readings[i] - readings[i - 1];
   }
 
-  accelVal += readings[numReadings - 1] - readings[0];
+  accelVal += readings[numReadings - 1] - readings[0];*/
+
+  // avgの比較のみで加速度を取る場合
+  accelVal = lastAverageVal - averageVal;
 
   return accelVal;
 }
@@ -175,21 +189,21 @@ int SmoothingReadings::calcAccel() {
 /**
    加速度を返す
 */
-int SmoothingReadings::getAccel() {
+long SmoothingReadings::getAccel() {
   return accelVal;
 }
 
 /**
    最小値を返す
 */
-int SmoothingReadings::getMin() {
+long SmoothingReadings::getMin() {
   return minVal;
 }
 
 /**
    最大値を返す
 */
-int SmoothingReadings::getMax() {
+long SmoothingReadings::getMax() {
   return maxVal;
 }
 
@@ -217,13 +231,17 @@ void SmoothingReadings::debugPrint() {
 /**
    デバッグ表示をする
 */
-void SmoothingReadings::debugPrint(int _rawVal) {
+void SmoothingReadings::debugPrint(long _rawVal) {
   Serial.print("rawVal: ");
   Serial.print(_rawVal);
   Serial.print("\t");
 
   Serial.print("average: ");
   Serial.print(averageVal);
+  Serial.print("\t");
+
+  Serial.print("lastAverage: ");
+  Serial.print(lastAverageVal);
   Serial.print("\t");
 
   Serial.print("accelVal: ");
@@ -253,11 +271,14 @@ void SmoothingReadings::debugPlot() {
 /**
    プロット用のデバッグ表示をする
 */
-void SmoothingReadings::debugPlot(int _rawVal) {
+void SmoothingReadings::debugPlot(long _rawVal) {
   Serial.print(_rawVal);
   Serial.print("\t");
 
   Serial.print(averageVal);
+  Serial.print("\t");
+
+  Serial.print(lastAverageVal);
   Serial.print("\t");
 
   Serial.print(accelVal);
@@ -282,6 +303,9 @@ void SmoothingReadings::showPlotLabel() {
   Serial.print("\t");
 
   Serial.print("average");
+  Serial.print("\t");
+
+  Serial.print("lastAverage");
   Serial.print("\t");
 
   Serial.print("accel");

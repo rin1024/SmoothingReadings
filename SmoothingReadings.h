@@ -35,28 +35,29 @@ class SmoothingReadings {
 
     void setup(int _numReadings);
     void setup(int _numReadings, int _numOffsetReadings);
-    bool calcOffset(int _rawVal);
-    bool update(int _rawVal);
+    bool calcOffset(long _rawVal);
+    bool update(long _rawVal);
 
     int getNumReadings();
     void reallocReadings(int _numReadings);
-    int getReading(int _index);
+    long getReading(int _index);
     int getReadingIndex();
     
-    int getOffset();
-    int getAverage();
-    int calcAccel();
-    int getAccel();
-    int getMin();
-    int getMax();
+    long getOffset();
+    long getAverage();
+    long getLastAverage();
+    long calcAccel();
+    long getAccel();
+    long getMin();
+    long getMax();
 
     void enableDebug(int _debugType);
     void disableDebug();
 
     void debugPrint();
-    void debugPrint(int _rawVal);
+    void debugPrint(long _rawVal);
     void debugPlot();
-    void debugPlot(int _rawVal);
+    void debugPlot(long _rawVal);
     void showPlotLabel();
 
     void dumpReadings();
@@ -65,7 +66,7 @@ class SmoothingReadings {
     bool firstLoop;
 
     int numReadings;
-    int *readings;
+    long *readings;
     int readingIndex;
     long total;
 
@@ -73,11 +74,12 @@ class SmoothingReadings {
     long totalOffsetVal;
     int numOffsetReadings;
 
-    int offsetVal;
-    int averageVal;
-    int accelVal;
-    int minVal;
-    int maxVal;
+    long offsetVal;
+    long averageVal;
+    long lastAverageVal;
+    long accelVal;
+    long minVal;
+    long maxVal;
 
     int debugType;
 };

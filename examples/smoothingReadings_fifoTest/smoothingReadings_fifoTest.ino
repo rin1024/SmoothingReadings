@@ -33,7 +33,7 @@ void loop() {
       continue;
     }
 
-    boolean updated = sensorValues.update(sensorVal);
+    boolean updated = sensorValues.update(long(sensorVal));
 
     // readings一覧を表示
     sensorValues.dumpReadings();
