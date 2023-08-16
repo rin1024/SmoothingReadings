@@ -232,30 +232,30 @@ void SmoothingReadings::debugPrint() {
    デバッグ表示をする
 */
 void SmoothingReadings::debugPrint(long _rawVal) {
-  Serial.print("rawVal: ");
+  Serial.print(F("rawVal: "));
   Serial.print(_rawVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
-  Serial.print("average: ");
+  Serial.print(F("average: "));
   Serial.print(averageVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
-  Serial.print("lastAverage: ");
+  Serial.print(F("lastAverage: "));
   Serial.print(lastAverageVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
-  Serial.print("accelVal: ");
+  Serial.print(F("accelVal: "));
   Serial.print(accelVal);
 
-  Serial.print("offset: ");
+  Serial.print(F("offset: "));
   Serial.print(offsetVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
-  Serial.print("minVal: ");
+  Serial.print(F("minVal: "));
   Serial.print(minVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
-  Serial.print("maxVal: ");
+  Serial.print(F("maxVal: "));
   Serial.print(maxVal);
 
   Serial.println();
@@ -273,22 +273,22 @@ void SmoothingReadings::debugPlot() {
 */
 void SmoothingReadings::debugPlot(long _rawVal) {
   Serial.print(_rawVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
   Serial.print(averageVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
   Serial.print(lastAverageVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
   Serial.print(accelVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
   Serial.print(offsetVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
   Serial.print(minVal);
-  Serial.print("\t");
+  Serial.print(F("\t"));
 
   Serial.print(maxVal);
 
@@ -299,25 +299,25 @@ void SmoothingReadings::debugPlot(long _rawVal) {
    プロット用のラベル表示をする
 */
 void SmoothingReadings::showPlotLabel() {
-  Serial.print("raw");
-  Serial.print("\t");
+  Serial.print(F("raw"));
+  Serial.print(F("\t"));
 
-  Serial.print("average");
-  Serial.print("\t");
+  Serial.print(F("average"));
+  Serial.print(F("\t"));
 
-  Serial.print("lastAverage");
-  Serial.print("\t");
+  Serial.print(F("lastAverage"));
+  Serial.print(F("\t"));
 
-  Serial.print("accel");
-  Serial.print("\t");
+  Serial.print(F("accel"));
+  Serial.print(F("\t"));
 
-  Serial.print("offset");
-  Serial.print("\t");
+  Serial.print(F("offset"));
+  Serial.print(F("\t"));
 
-  Serial.print("min");
-  Serial.print("\t");
+  Serial.print(F("min"));
+  Serial.print(F("\t"));
 
-  Serial.print("max");
+  Serial.print(F("max"));
 
   Serial.println();
 }
@@ -328,15 +328,15 @@ void SmoothingReadings::showPlotLabel() {
 void SmoothingReadings::dumpReadings() {
   int headIndex = this->getReadingIndex();
   int numReadings = this->getNumReadings();
-  Serial.print("[");
+  Serial.print(F("["));
   Serial.print(headIndex);
-  Serial.print(" / ");
+  Serial.print(F(" / "));
   Serial.print(numReadings);
-  Serial.print("] ");
+  Serial.print(F("] "));
   for (int i=0;i<numReadings;i++) {
     int val = this->getReading((headIndex + i) % numReadings);
     Serial.print(val);
-    Serial.print(" ");
+    Serial.print(F(" "));
   }
   Serial.println();
 }
