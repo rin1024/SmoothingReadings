@@ -177,11 +177,12 @@ long SmoothingReadings::getAverage() {
 long SmoothingReadings::calcAccel() {
   accelVal = 0;
 
-  for (int i=0;i<numReadings;i++) {
-    int currentIndex = (i    ) % numReadings;
-    int prevIndex    = (i - 1) % numReadings;
+  for (int i=1;i<numReadings;i++) {
+    int currentIndex = (readingIndex + i    ) % numReadings;
+    int prevIndex    = (readingIndex + i - 1) % numReadings;
 
-    if (prevIndex == -1) {
+    // readingIndexが0のときに発生するはず
+    if (currentIndex == 0 && prevIndex == -1) {
       if (firstLoop) {
         continue;
       }
@@ -190,10 +191,10 @@ long SmoothingReadings::calcAccel() {
     }
 
     // NOTE: readingAveragesで計算するばあい
-    accelVal += readingAverages[currentIndex] - readingAverages[prevIndex];
+    //accelVal += readingAverages[currentIndex] - readingAverages[prevIndex];
 
     // NOTE: readingsでの加速度にする場合。こちらのほうが瞬間的なスパイクとりやすいかも。
-    //accelVal += readings[currentIndex] - readingAverages[prevIndex];
+    accelVal += readings[currentIndex] - readingAverages[prevIndex];
   }
 
   return accelVal;
