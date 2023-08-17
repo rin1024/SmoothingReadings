@@ -2,6 +2,8 @@
 
 センサー等の値を平滑化する
 
+![screenShot](documents/images/ss.png)
+
 ## Usage
 
 ```
