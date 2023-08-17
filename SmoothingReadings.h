@@ -41,6 +41,7 @@ class SmoothingReadings {
     int getNumReadings();
     void reallocReadings(int _numReadings);
     long getReading(int _index);
+    long getReadingAverage(int _index);
     int getReadingIndex();
     
     long getOffset();
@@ -60,14 +61,17 @@ class SmoothingReadings {
     void showPlotLabel();
 
     void dumpReadings();
+    void dumpReadingAverages();
 
   private:
     bool firstLoop;
 
     int numReadings;
     long *readings;
+    long *readingAverages;
     int readingIndex;
     long total;
+    long totalAverage;
 
     int offsetCount;
     long totalOffsetVal;

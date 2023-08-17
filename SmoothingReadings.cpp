@@ -27,6 +27,7 @@ SmoothingReadings::SmoothingReadings(int _numReadings) {
 */
 SmoothingReadings::~SmoothingReadings() {
   delete[] readings;
+  delete[] readingAverages;
 }
 
 /**
@@ -73,9 +74,7 @@ bool SmoothingReadings::update(long _rawVal) {
   long formattedVal = _rawVal - offsetVal;
   
   total = total - readings[readingIndex];
-  
   readings[readingIndex] = formattedVal;
-  
   total = total + readings[readingIndex];
 
   if (minVal > formattedVal) {
@@ -88,8 +87,12 @@ bool SmoothingReadings::update(long _rawVal) {
 
   averageVal = total / long(numReadings);
 
+  totalAverage = totalAverage - readingAverages[readingIndex];
+  readingAverages[readingIndex] = averageVal;
+  totalAverage = totalAverage + readingAverages[readingIndex];
+
   calcAccel();
-  
+
   if (debugType == DEBUG_TYPE_PRINT) {
     debugPrint(_rawVal);
   }
@@ -122,12 +125,15 @@ void SmoothingReadings::reallocReadings(int _numReadings) {
   numReadings = _numReadings;
 
   readings = new long[numReadings];
+  readingAverages = new long[numReadings];
   for (int i=0;i<numReadings;i++) {
     readings[i] = 0;
+    readingAverages[i] = 0;
   }
   readingIndex = 0;
   
   total = 0;
+  totalAverage = 0;
 }
 
 /**
@@ -135,6 +141,13 @@ void SmoothingReadings::reallocReadings(int _numReadings) {
 */
 long SmoothingReadings::getReading(int _index) {
   return readings[_index];
+}
+
+/**
+   任意のindexのreadingAveragesをかえす
+*/
+long SmoothingReadings::getReadingAverage(int _index) {
+  return readingAverages[_index];
 }
 
 /**
@@ -162,15 +175,25 @@ long SmoothingReadings::getAverage() {
    加速度をその場で計算して返す
 */
 long SmoothingReadings::calcAccel() {
-  // readingsからの差分でちゃんと計算する場合
   accelVal = 0;
 
-  for (int i=1;i<numReadings;i++) {
-    accelVal += readings[i] - readings[i - 1];
-  }
+  for (int i=0;i<numReadings;i++) {
+    int currentIndex = (i    ) % numReadings;
+    int prevIndex    = (i - 1) % numReadings;
 
-  if (!firstLoop) {
-    accelVal += readings[numReadings - 1] - readings[0];
+    if (prevIndex == -1) {
+      if (firstLoop) {
+        continue;
+      }
+      currentIndex = 0;
+      prevIndex = numReadings - 1;
+    }
+
+    // NOTE: readingAveragesで計算するばあい
+    accelVal += readingAverages[currentIndex] - readingAverages[prevIndex];
+
+    // NOTE: readingsでの加速度にする場合。こちらのほうが瞬間的なスパイクとりやすいかも。
+    //accelVal += readings[currentIndex] - readingAverages[prevIndex];
   }
 
   return accelVal;
@@ -224,25 +247,30 @@ void SmoothingReadings::debugPrint() {
 void SmoothingReadings::debugPrint(long _rawVal) {
   Serial.print(F("rawVal: "));
   Serial.print(_rawVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("average: "));
   Serial.print(averageVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("accelVal: "));
   Serial.print(accelVal);
 
+  Serial.print(F("\t"));
   Serial.print(F("offset: "));
   Serial.print(offsetVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("minVal: "));
   Serial.print(minVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("maxVal: "));
   Serial.print(maxVal);
+
+  //Serial.print(F("\t"));
+  //Serial.print(F("totalAverage: "));
+  //Serial.print(totalAverage);
 
   Serial.println();
 }
@@ -259,21 +287,24 @@ void SmoothingReadings::debugPlot() {
 */
 void SmoothingReadings::debugPlot(long _rawVal) {
   Serial.print(_rawVal);
+  
   Serial.print(F("\t"));
-
   Serial.print(averageVal);
+  
   Serial.print(F("\t"));
-
   Serial.print(accelVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(offsetVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(minVal);
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(maxVal);
+
+  //Serial.print(F("\t"));
+  //Serial.print(totalAverage);
 
   Serial.println();
 }
@@ -283,21 +314,24 @@ void SmoothingReadings::debugPlot(long _rawVal) {
 */
 void SmoothingReadings::showPlotLabel() {
   Serial.print(F("raw"));
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("average"));
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("accel"));
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("offset"));
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("min"));
-  Serial.print(F("\t"));
 
+  Serial.print(F("\t"));
   Serial.print(F("max"));
+
+  //Serial.print(F("\t"));
+  //Serial.print(F("totalAverage"));
 
   Serial.println();
 }
@@ -306,17 +340,45 @@ void SmoothingReadings::showPlotLabel() {
    現在のreadingsをhead(readingIndex)から表示する
    */
 void SmoothingReadings::dumpReadings() {
-  int headIndex = this->getReadingIndex();
-  int numReadings = this->getNumReadings();
-  Serial.print(F("["));
-  Serial.print(headIndex);
-  Serial.print(F(" / "));
-  Serial.print(numReadings);
-  Serial.print(F("] "));
+  //Serial.print(F("["));
+  //Serial.print(readingIndex);
+  //Serial.print(F(" / "));
+  //Serial.print(numReadings);
+  //Serial.print(F("] "));
+
   for (int i=0;i<numReadings;i++) {
-    int val = this->getReading((headIndex + i) % numReadings);
-    Serial.print(val);
+    char buff[10];
+    sprintf(buff, "%-4ld", readings[(readingIndex + i) % numReadings]);
+    Serial.print(buff);
+
     Serial.print(F(" "));
   }
+
+  Serial.println();
+}
+
+/**
+   現在のreadingAveragesをhead(readingIndex)から逆順？に表示する
+   */
+void SmoothingReadings::dumpReadingAverages() {
+  //Serial.print(F("["));
+  //Serial.print(readingIndex);
+  //Serial.print(F(" / "));
+  //Serial.print(numReadings);
+  //Serial.print(F("] "));
+
+  for (int i=0;i<numReadings;i++) {
+    int index = readingIndex - i;
+    if (index < 0) {
+      index += numReadings;
+    }
+
+    char buff[10];
+    sprintf(buff, "%-4ld", readingAverages[index]);
+    Serial.print(buff);
+    
+    Serial.print(F(" "));
+  }
+
   Serial.println();
 }
