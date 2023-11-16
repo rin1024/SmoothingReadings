@@ -21,9 +21,9 @@
 /*******************************************
    const
  *******************************************/
-#define DEBUG_TYPE_NONE  0
-#define DEBUG_TYPE_PRINT 1
-#define DEBUG_TYPE_PLOT  2
+#define SR_DEBUG_TYPE_NONE  0
+#define SR_DEBUG_TYPE_PRINT 1
+#define SR_DEBUG_TYPE_PLOT  2
 
 /**************************************************************************************
    Smoothing readings

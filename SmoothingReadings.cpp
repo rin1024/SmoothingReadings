@@ -19,7 +19,7 @@ SmoothingReadings::SmoothingReadings(int _numReadings) {
   minVal = 0;
   maxVal = 0;
 
-  debugType = DEBUG_TYPE_NONE;
+  debugType = SR_DEBUG_TYPE_NONE;
 }
 
 /**
@@ -93,10 +93,10 @@ bool SmoothingReadings::update(long _rawVal) {
 
   calcAccel();
 
-  if (debugType == DEBUG_TYPE_PRINT) {
+  if (debugType == SR_DEBUG_TYPE_PRINT) {
     debugPrint(_rawVal);
   }
-  else if (debugType == DEBUG_TYPE_PLOT) {
+  else if (debugType == SR_DEBUG_TYPE_PLOT) {
     debugPlot(_rawVal);
   }
 
@@ -232,7 +232,7 @@ void SmoothingReadings::enableDebug(int _debugType) {
    デバッグ表示を無効化
 */
 void SmoothingReadings::disableDebug() {
-  debugType = DEBUG_TYPE_NONE;
+  debugType = SR_DEBUG_TYPE_NONE;
 }
 
 /**
