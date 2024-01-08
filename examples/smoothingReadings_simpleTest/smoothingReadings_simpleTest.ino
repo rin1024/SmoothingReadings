@@ -25,9 +25,6 @@ void setup() {
 
   sensorValues.setup(NUM_READINGS, NUM_OFFSET_READINGS);
   //sensorValues.enableDebug(DEBUG_TYPE_PLOT);
-  while (sensorValues.calcOffset(analogRead(0))) {
-    ;
-  }
 }
 
 void loop() {

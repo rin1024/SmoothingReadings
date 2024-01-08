@@ -52,15 +52,18 @@ void SmoothingReadings::setup(int _numReadings, int _numOffsetReadings) {
  * @return true if finished
  */
 bool SmoothingReadings::calcOffset(long _rawVal) {
-  if (offsetCount++ < numOffsetReadings) {
+  if (numOffsetReadings == 0) {
+    return true;
+  }
+
+  if (offsetCount < numOffsetReadings) {
     totalOffsetVal += long(_rawVal);
+    offsetCount++;
 
     return false;
   }
-
-  offsetVal = numOffsetReadings == 0 ? 
-    0 : 
-    totalOffsetVal / long(numOffsetReadings);
+  
+  offsetVal = totalOffsetVal / long(numOffsetReadings);
 
   return true;
 }
@@ -71,6 +74,13 @@ bool SmoothingReadings::calcOffset(long _rawVal) {
 bool SmoothingReadings::update(long _rawVal) {
   bool updated = false;
 
+  // キャリブレーション実行
+  bool calcOffsetFinished = calcOffset(_rawVal);
+  if (!calcOffsetFinished) {
+    return false;
+  }
+
+  // キャリブレーションした値を差し引く
   long formattedVal = _rawVal - offsetVal;
   
   total = total - readings[readingIndex];
